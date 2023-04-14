@@ -1,6 +1,16 @@
 # Multi Agent Debate
 Multi Agent Simulation of a Simple Firearm Debate using Mesa
 
+## Table of Contents
+- [**Example**](#example)
+- [**Implementation**](#implementation)
+  - [**Preferences**](#preferences)
+  - [**Dataset**](#dataset)
+  - [**Messaging**](#messaging)
+  - [**Arguments**](#arguments)
+- [**Usage**](#usage)
+
+
 ## Example
 
 In this simulation, two agents argue about which infantry weapon to choose for a reconaissance mission.
