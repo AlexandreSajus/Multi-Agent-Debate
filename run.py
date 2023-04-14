@@ -6,7 +6,7 @@ import pandas as pd
 from mesa import Model
 from mesa.time import RandomActivation
 
-from communication.agent.communicatingagent import CommunicatingAgent
+from communication.agent.communicating_agent import CommunicatingAgent
 from communication.message.MessageService import MessageService
 from communication.message.Message import Message
 from communication.message.MessagePerformative import MessagePerformative
