@@ -1,12 +1,17 @@
 WEAPON;STOPPING_POWER;FIRE_RATE;RANGE;CAPACITY;MOBILITY;PRICE
 Glock 17;4;3;2;5;10;10
-Daniel Defense M4;8;7;6;10;6;3
-Mossberg 870;10;2;3;3;7;7
-Remington M700;10;2;10;1;7;9
+Daniel Defense M4;8;7;6;8;6;3
+Mossberg 870;9;2;3;3;7;7
+Remington M700;9;2;10;1;6;9
 Staccato 2011;4;4;2;6;10;3
-Benelli M4;10;3;3;1;7;5
-Saiga AK-74;8;6;6;10;6;7
-Desert Tech MDR;8;8;7;10;5;2
-Lobaev Arms DVL-10;10;2;10;1;7;4
-Kel-Tec RFB;8;7;7;10;5;4
-Remington SASS;10;3;9;7;2;1
+Benelli M4;9;3;3;1;7;5
+Saiga AK-74;8;6;6;8;6;7
+Desert Tech MDR;8;8;7;8;5;2
+Lobaev Arms DVL-10;9;2;10;1;7;4
+Kel-Tec RFB;8;7;7;8;5;4
+Remington SASS;9;3;9;7;2;1
+RPG-7V2;10;1;4;1;1;2
+HK MP5;4;9;3;8;8;4
+Kriss Vector;4;10;3;8;8;2
+Desert Eagle;6;2;2;3;9;4
+FN Minimi;8;5;5;10;3;3

@@ -2,7 +2,7 @@
 
 from arguments.comparison import Comparison
 from arguments.couplevalue import CoupleValue
-from communication.preferences import Preferences
+from communication.preferences.Preferences import Preferences
 from communication.preferences.Item import Item
 
 
@@ -39,9 +39,11 @@ class Argument:
         based on agent ’s preferences )
         """
         premisses = []
-        for criterion in preferences.criterion_name_list:
-            if preferences.get_criterion_value(item, criterion).value > 5:
-                premisses.append(criterion)
+        for criterion in preferences.get_criterion_name_list():
+            if preferences.get_value(item, criterion) > 4:
+                premisses.append(
+                    CoupleValue(criterion, preferences.get_value(item, criterion))
+                )
         return premisses
 
     def list_attacking_proposal(self, item: Item, preferences: Preferences):
@@ -53,5 +55,7 @@ class Argument:
         premisses = []
         for criterion in preferences.criterion_name_list:
             if preferences.get_criterion_value(item, criterion).value < 5:
-                premisses.append(criterion)
+                premisses.append(
+                    CoupleValue(criterion, preferences.get_value(item, criterion))
+                )
         return premisses

@@ -64,14 +64,14 @@ class Preferences:
         item_list.sort(key=lambda x: x.get_score(self), reverse=True)
         return item_list[0]
 
-    def is_item_among_top_20_percent(self, item, item_list):
+    def is_item_among_top_10_percent(self, item, item_list):
         """
         Return whether a given item is among the top 10 percent of the preferred items.
 
         :return: a boolean, True means that the item is among the favourite ones
         """
         item_list.sort(key=lambda x: x.get_score(self), reverse=True)
-        top_20_percent = int(len(item_list) * 0.5)
+        top_20_percent = int(len(item_list) * 0.1)
         return item in item_list[:top_20_percent]
 
 

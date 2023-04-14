@@ -15,6 +15,7 @@ from communication.preferences.Preferences import Preferences
 from communication.preferences.CriterionValue import CriterionValue
 from communication.preferences.Item import Item
 from communication.preferences.CriterionName import criterion_find
+from arguments.couplevalue import CoupleValue
 
 from arguments.argument import Argument
 
@@ -43,9 +44,7 @@ class ArgumentModel(Model):
         # Read the dataset
         dataset = pd.read_csv(DATASET_PATH, sep=";")
 
-        self.preferences.set_criterion_name_list(
-            [criterion_find(column) for column in dataset.columns if column != "WEAPON"]
-        )
+        self.preferences.set_criterion_name_list([0, 1, 2, 3, 4, 5])
 
         # Add values
         self.items = []
@@ -62,6 +61,7 @@ class ArgumentModel(Model):
                         )
                     )
 
+        # Create agents
         agent1 = ArgumentAgent(1, self, "A", self.preferences)
         self.schedule.add(agent1)
 
@@ -79,23 +79,83 @@ class ArgumentModel(Model):
         : param item : str - name of the item which was proposed
         : return : string - the strongest supportive argument
         """
-        premisses = Argument.list_supporting_proposal(item, self.preferences)
-        return random.choice(premisses)
+        argument = Argument(True, item)
+        premisses = argument.list_supporting_proposal(item, self.preferences)
+        return ["Because", item, random.choice(premisses)]
+
+    def counter_proposal(self, proposed_item: Item, couple_value: CoupleValue):
+        """
+        Find a counter proposal to the given item
+        - Try to find an item with a better value for the given criterion
+        - If not, consider a better criterion
+        - If not, propose a random item
+        """
+        criterion = couple_value.criterion_name
+        value = couple_value.value
+
+        # Find an item with a better value for the given criterion
+        for item in self.items:
+            item_value = self.preferences.get_value(item, criterion)
+            if item_value > value:
+                return [
+                    "Found better item for this criterion",
+                    item,
+                    CoupleValue(criterion, item_value),
+                ]
+
+        # Consider a better criterion
+        best_criterion = None
+        for criterion in self.preferences.get_criterion_name_list():
+            if criterion != couple_value.criterion_name:
+                best_criterion = criterion
+            else:
+                break
+        # Find an item with a better value for the best criterion
+        if best_criterion is not None:
+            best_criterion_value = self.preferences.get_value(
+                proposed_item, best_criterion
+            )
+            for item in self.items:
+                item_value = self.preferences.get_value(item, best_criterion)
+                if item_value > best_criterion_value:
+                    return [
+                        "The criterion is not the most important one",
+                        item,
+                        CoupleValue(best_criterion, item_value),
+                    ]
+
+        # Else random item
+        item = random.choice(self.items)
+        return [
+            "The item is not satisfying, how about...",
+            item,
+            self.support_proposal(item)[2],
+        ]
 
     def step(self):
         self.__messages_service.dispatch_messages()
         self.schedule.step()
         for agent in self.schedule.agents:
             unread_messages = agent.get_new_messages()
-            print(agent.get_name() + " has " + str(len(unread_messages)) + " messages.")
             for message in unread_messages:
-                print(message.get_content())
+                # Parse the message
                 sender = message.get_exp()
                 receiver = message.get_dest()
                 performative = message.get_performative()
                 content = message.get_content()
+
+                # Print the message
+                print(f"Message from {sender}: {performative}")
+                if isinstance(content, list):
+                    for element in content:
+                        print(element)
+                else:
+                    print(content)
+                print("")
+
+                # If PROPOSE, send ACCEPT or ASK_WHY
                 if performative == MessagePerformative.PROPOSE:
-                    if self.preferences.is_item_among_top_20_percent(
+                    if self.preferences.is_item_among_top_10_percent(
                         content, self.items
                     ):
                         self.__messages_service.send_message(
@@ -109,12 +169,16 @@ class ArgumentModel(Model):
                                 receiver, sender, MessagePerformative.ASK_WHY, content
                             )
                         )
+
+                # If ACCEPT, send COMMIT
                 elif performative == MessagePerformative.ACCEPT:
                     # Send COMMIT message
                     self.__messages_service.send_message(
                         Message(receiver, sender, MessagePerformative.COMMIT, content)
                     )
                     self.commits += 1
+
+                # If COMMIT, send COMMIT and stop the simulation
                 elif performative == MessagePerformative.COMMIT:
                     if self.commits == 1:
                         self.__messages_service.send_message(
@@ -124,17 +188,43 @@ class ArgumentModel(Model):
                         )
                         self.commits += 1
                     elif self.commits == 2:
+                        print(f"Commitment reached for {content} !\n")
                         self.running = False
-                        print(f"Proposition accepted: {content.get_name()}")
 
+                # If ASK_WHY, send ARGUE
                 elif performative == MessagePerformative.ASK_WHY:
-                    self.running = False
-                    print("Proposition rejected")
+                    self.__messages_service.send_message(
+                        Message(
+                            receiver,
+                            sender,
+                            MessagePerformative.ARGUE,
+                            self.support_proposal(content),
+                        )
+                    )
+
+                # If ARGUE, send ACCEPT or ARGUE
+                elif performative == MessagePerformative.ARGUE:
+                    [comment, item, couple_value] = content
+                    if self.preferences.is_item_among_top_10_percent(item, self.items):
+                        self.__messages_service.send_message(
+                            Message(receiver, sender, MessagePerformative.ACCEPT, item)
+                        )
+                    else:
+                        self.__messages_service.send_message(
+                            Message(
+                                receiver,
+                                sender,
+                                MessagePerformative.ARGUE,
+                                self.counter_proposal(item, couple_value),
+                            )
+                        )
 
 
+# Run the simulation
 argument_model = ArgumentModel()
-for i in range(10):
+
+for i in range(20):
     if not argument_model.running:
         break
-    print(f"\nStep {i}")
+    print(f"Step {i}:")
     argument_model.step()
