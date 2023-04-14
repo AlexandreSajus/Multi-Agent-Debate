@@ -1,7 +1,7 @@
 """ Module for generating Arguments """
 
-from arguments.Comparison import Comparison
-from arguments.CoupleValue import CoupleValue
+from arguments.comparison import Comparison
+from arguments.couplevalue import CoupleValue
 from communication.preferences.Preferences import Preferences
 from communication.preferences.Item import Item
 
